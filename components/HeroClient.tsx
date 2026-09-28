@@ -46,9 +46,6 @@ export function HeroClient({ hasImage }: { hasImage: boolean }) {
 
   return (
     <section ref={ref} className="relative overflow-hidden px-4 pb-14 pt-4 sm:px-6 md:pb-20 md:pt-10">
-      {/* měkké kulaté tvary v pozadí */}
-      <div aria-hidden="true" className="pointer-events-none absolute -right-40 -top-40 h-[520px] w-[520px] rounded-full bg-mlha-2" />
-      <div aria-hidden="true" className="pointer-events-none absolute -left-24 bottom-0 h-64 w-64 rounded-full bg-white/60" />
 
       <div className="relative mx-auto grid max-w-6xl items-center gap-8 md:grid-cols-[1fr_1.05fr] md:gap-8">
         <motion.div style={{ y: textY }} className="order-2 md:order-1">
