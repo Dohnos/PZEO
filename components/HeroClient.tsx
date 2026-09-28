@@ -14,8 +14,8 @@ const facts = [
 ];
 
 const floating = [
-  { icon: HandHeart, text: "Ručně balené v Česku", pos: "left-[-2%] top-[14%] sm:left-[-6%]", delay: 0 },
-  { icon: Truck, text: "Domů i do kanceláře", pos: "right-[-2%] bottom-[16%] sm:right-[-4%]", delay: 1.2 },
+  { icon: HandHeart, text: "Ručně balené v Česku", pos: "left-[-2%] top-[6%] sm:left-[-6%]", delay: 0 },
+  { icon: Truck, text: "Domů i do kanceláře", pos: "right-[-2%] bottom-[3%] sm:right-[-4%]", delay: 1.2 },
 ];
 
 export function HeroClient({ hasImage }: { hasImage: boolean }) {
@@ -85,8 +85,8 @@ export function HeroClient({ hasImage }: { hasImage: boolean }) {
             <Image
               src="/hero.webp"
               alt="Otevřený box Pauzeo s čajem, svíčkou a dalšími věcmi od českých manufaktur"
-              width={1600}
-              height={1600}
+              width={1024}
+              height={1024}
               priority
               sizes="(min-width: 768px) 520px, 92vw"
               className="aspect-square w-full rounded-[48px] object-cover shadow-[0_30px_80px_rgba(15,42,54,0.18)]"
