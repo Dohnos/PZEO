@@ -24,10 +24,20 @@ export function HeroClient({ hasImage }: { hasImage: boolean }) {
   const reduce = useReducedMotion();
   const vlna = boxes[1];
 
+  const [desktop, setDesktop] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setDesktop(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  const still = reduce || !desktop;
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const visualY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 90]);
-  const visualScale = useTransform(scrollYProgress, [0, 1], [1, reduce ? 1 : 0.94]);
-  const textY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 40]);
+  const visualY = useTransform(scrollYProgress, [0, 1], [0, still ? 0 : 90]);
+  const visualScale = useTransform(scrollYProgress, [0, 1], [1, still ? 1 : 0.94]);
+  const textY = useTransform(scrollYProgress, [0, 1], [0, still ? 0 : 40]);
 
   useEffect(() => {
     const id = window.setTimeout(() => setOpen(true), 700);
@@ -35,13 +45,13 @@ export function HeroClient({ hasImage }: { hasImage: boolean }) {
   }, []);
 
   return (
-    <section ref={ref} className="relative overflow-hidden px-4 pb-14 pt-8 sm:px-6 md:pb-20 md:pt-14">
+    <section ref={ref} className="relative overflow-hidden px-4 pb-14 pt-4 sm:px-6 md:pb-20 md:pt-10">
       {/* měkké kulaté tvary v pozadí */}
       <div aria-hidden="true" className="pointer-events-none absolute -right-40 -top-40 h-[520px] w-[520px] rounded-full bg-mlha-2" />
       <div aria-hidden="true" className="pointer-events-none absolute -left-24 bottom-0 h-64 w-64 rounded-full bg-white/60" />
 
-      <div className="relative mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-[1.05fr_1fr] md:gap-6">
-        <motion.div style={{ y: textY }}>
+      <div className="relative mx-auto grid max-w-6xl items-center gap-8 md:grid-cols-[1fr_1.05fr] md:gap-8">
+        <motion.div style={{ y: textY }} className="order-2 md:order-1">
           <h1 className="font-display text-[clamp(3.4rem,9vw,6.6rem)] font-medium leading-[0.95] tracking-[-0.02em] text-hlubina">
             Dejte týmu pauzu.
           </h1>
@@ -80,7 +90,7 @@ export function HeroClient({ hasImage }: { hasImage: boolean }) {
           </ul>
         </motion.div>
 
-        <motion.div style={{ y: visualY, scale: visualScale }} className="relative mx-auto w-full max-w-[520px]">
+        <motion.div style={{ y: visualY, scale: visualScale }} className="relative order-1 mx-auto w-full max-w-[560px] md:order-2">
           {hasImage ? (
             <Image
               src="/hero.webp"
@@ -88,8 +98,8 @@ export function HeroClient({ hasImage }: { hasImage: boolean }) {
               width={1024}
               height={1024}
               priority
-              sizes="(min-width: 768px) 520px, 92vw"
-              className="aspect-square w-full rounded-[48px] object-cover shadow-[0_30px_80px_rgba(15,42,54,0.18)]"
+              sizes="(min-width: 768px) 560px, 92vw"
+              className="aspect-square w-full rounded-[36px] object-cover shadow-[0_24px_60px_rgba(15,42,54,0.16)] md:rounded-[48px]"
             />
           ) : (
             <BoxScene variant={vlna} items={vlna.items.zeny} open={open} contentKey="hero" halo="#d3e3e0" />

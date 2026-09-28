@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 const links = [
   { href: "#boxy", label: "Boxy" },
@@ -26,8 +27,8 @@ export function Header() {
           aria-label="Hlavní navigace"
           className="flex items-center justify-between gap-4 rounded-full border border-hlubina/10 bg-white/80 py-2 pl-5 pr-2 shadow-[0_8px_30px_rgba(15,42,54,0.08)] backdrop-blur-md"
         >
-          <a href="#" className="font-display text-2xl italic leading-none text-hlubina">
-            pauzeo
+          <a href="#" aria-label="Pauzeo, na začátek stránky" className="text-vlna">
+            <Logo size={21} />
           </a>
 
           <ul className="hidden items-center gap-1 md:flex">

@@ -86,10 +86,10 @@ export function BoxScene({ variant, items, open, contentKey, highlighted = null,
       >
         <Motif variant={variant} />
         <span
-          className="font-display italic leading-none"
-          style={{ color: t.motif, fontSize: "5cqw" }}
+          className="font-display uppercase leading-none tracking-[0.16em]"
+          style={{ color: t.motif, fontSize: "3.8cqw", fontVariationSettings: '"SOFT" 0, "opsz" 72' }}
         >
-          pauzeo
+          Pauzeo
         </span>
       </motion.div>
 
