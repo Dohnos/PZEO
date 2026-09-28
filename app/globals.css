@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces Variable", ui-serif, Georgia, serif;
+  --font-sans: "Figtree Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --color-mlha: #edf2f0;
+  --color-mlha-2: #dfe9e6;
+  --color-hlubina: #0f2a36;
+  --color-hlubina-2: #3f5a63;
+  --color-kapka: #6f9bad;
+  --color-vlna: #2e6b6f;
+  --color-vlna-2: #245a5e;
+  --color-ocean: #10222f;
+  --color-zlato: #c9a45c;
+  --color-pisek: #e8d6ac;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 104px;
+}
+
+body {
+  background: var(--color-mlha);
+  color: var(--color-hlubina);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Fraunces s osou SOFT = zaoblené patky, ladí s kulatými prvky webu */
+.font-display {
+  font-variation-settings: "SOFT" 100, "WONK" 0;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-vlna);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
