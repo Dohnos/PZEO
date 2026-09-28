@@ -116,13 +116,13 @@ export function BoxScene({ variant, items, open, contentKey, highlighted = null,
   );
 }
 
-function Motif({ variant }: { variant: BoxVariant }) {
+export function Motif({ variant, className }: { variant: BoxVariant; className?: string }) {
   const c = variant.theme.motif;
   const common = { fill: "none", stroke: c, strokeLinecap: "round" as const };
 
   if (variant.id === "kapka") {
     return (
-      <svg viewBox="0 0 40 50" className="h-[36%]">
+      <svg viewBox="0 0 40 50" className={className ?? "h-[36%]"}>
         <path d="M20 3C20 3 5 22 5 33a15 15 0 0 0 30 0C35 22 20 3 20 3Z" {...common} strokeWidth={2.2} />
         <path d="M20 21c0 0-7 9-7 14a7 7 0 0 0 14 0c0-5-7-14-7-14Z" fill={c} />
       </svg>
@@ -131,7 +131,7 @@ function Motif({ variant }: { variant: BoxVariant }) {
 
   if (variant.id === "vlna") {
     return (
-      <svg viewBox="0 0 120 44" className="h-[30%]">
+      <svg viewBox="0 0 120 44" className={className ?? "h-[30%]"}>
         <path d="M4 10C19 2 34 2 49 10s30 8 45 0 18-6 22-3" {...common} strokeWidth={2.4} opacity={0.7} />
         <path d="M4 22C19 14 34 14 49 22s30 8 45 0 18-6 22-3" {...common} strokeWidth={3.2} />
         <path d="M4 34C19 26 34 26 49 34s30 8 45 0 18-6 22-3" {...common} strokeWidth={2.4} opacity={0.7} />
@@ -140,7 +140,7 @@ function Motif({ variant }: { variant: BoxVariant }) {
   }
 
   return (
-    <svg viewBox="0 0 120 60" className="h-[36%]">
+    <svg viewBox="0 0 120 60" className={className ?? "h-[36%]"}>
       <circle cx="60" cy="22" r="14" {...common} strokeWidth={1.8} />
       <path d="M10 40h100" {...common} strokeWidth={1.8} />
       <path d="M22 48c12-4 24-4 36 0s24 4 40 0" {...common} strokeWidth={1.4} />

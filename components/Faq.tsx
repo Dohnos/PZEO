@@ -3,27 +3,19 @@ import { Plus } from "lucide-react";
 const faq = [
   {
     q: "Kdy box dorazí?",
-    a: "Zimní box rozesíláme v lednu, jarní v dubnu, letní v červenci a podzimní v říjnu. Přesný termín dostanete spolu s fakturou.",
+    a: "V lednu, dubnu, červenci a říjnu. Přesný termín najdete na faktuře.",
   },
   {
     q: "Můžeme měnit počet boxů?",
-    a: "Ano, vždy do uzávěrky, tedy do 15. dne měsíce před rozesláním. Potom objednáváme zboží u výrobců a objednávka je závazná.",
+    a: "Ano, do 15. dne měsíce před rozesláním. Potom je objednávka závazná.",
   },
   {
     q: "Jak se platí?",
-    a: "Fakturou na každé čtvrtletí předem. Při platbě za celý rok najednou dostanete slevu 10 %.",
+    a: "Fakturou na každé čtvrtletí předem. Za platbu celého roku najednou dáváme slevu 10 %.",
   },
   {
-    q: "Co když má někdo alergii nebo mu nesedí některá vůně?",
-    a: "Napište nám to k objednávce. Položku vyměníme za jinou ve stejné hodnotě.",
-  },
-  {
-    q: "Můžeme přidat vlastní vzkaz nebo logo?",
-    a: "Vzkaz od vedení vložíme na kartu do každého boxu. Logo na krabici tiskneme od 100 kusů.",
-  },
-  {
-    q: "Jaká je minimální objednávka?",
-    a: "Deset boxů na čtvrtletí. Varianty i pánskou a dámskou náplň můžete kombinovat.",
+    q: "Co když má někdo alergii?",
+    a: "Napište nám to k objednávce a položku vyměníme za jinou ve stejné hodnotě.",
   },
 ];
 

@@ -48,10 +48,10 @@ export function ContactForm() {
       <div className="mx-auto grid max-w-6xl gap-10 rounded-[40px] bg-ocean p-6 text-[#f1eadb] sm:rounded-[48px] sm:p-10 md:grid-cols-[0.9fr_1.1fr] md:gap-14 md:p-14">
         <div>
           <h2 className="font-display text-[clamp(2.4rem,5vw,3.4rem)] font-medium leading-[1.02] tracking-[-0.015em]">
-            Vyzkoušejte box, než ho objednáte celému týmu
+            Vyzkoušejte box nejdřív sami
           </h2>
           <p className="mt-5 max-w-[40ch] text-lg leading-relaxed text-[#cfc6b4]">
-            Pošleme vám ukázkový box a nabídku na míru. Ozveme se do dvou pracovních dnů.
+            Pošleme vám ukázku a nabídku na míru do dvou pracovních dnů.
           </p>
         </div>
 

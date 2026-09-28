@@ -61,7 +61,7 @@ export const boxes: BoxVariant[] = [
     name: "Kapka",
     tagline: "Malá pauza pro každý den",
     description:
-      "Box pro celý tým. Šest drobností do běžného dne: čaj na odpoledne, svíčka na večer, péče o ruce a krátké dechové cvičení z karty.",
+      "Šest drobností do běžného dne pro celý tým.",
     price: 890,
     theme: {
       surface: "#dce9ec",
@@ -103,7 +103,7 @@ export const boxes: BoxVariant[] = [
     name: "Vlna",
     tagline: "Pauza, která tě ponese",
     description:
-      "Nejčastější volba pro pravidelný benefit. Větší svíčka, péče s esenciálními oleji a deník na dvanáct týdnů, který provede celým čtvrtletím.",
+      "Nejčastější volba pro pravidelný benefit, s deníkem na celé čtvrtletí.",
     price: 1490,
     theme: {
       surface: "#2e6b6f",
@@ -145,7 +145,7 @@ export const boxes: BoxVariant[] = [
     name: "Oceán",
     tagline: "Hluboký klid pro ty, kdo táhnou tým",
     description:
-      "Prémiový box pro vedení a klíčové lidi. Keramika, české sklo, luxusní péče a online sezení s koučem nebo psychologem na rezervaci přes QR kód.",
+      "Prémiový box pro vedení s keramikou, českým sklem a sezením s koučem.",
     price: 2990,
     theme: {
       surface: "#10222f",
