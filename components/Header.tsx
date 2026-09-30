@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, UserRound, X } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
 const links = [
@@ -9,7 +9,6 @@ const links = [
   { href: "#jak-to-funguje", label: "Jak to funguje" },
   { href: "#pro-firmy", label: "Pro firmy" },
   { href: "#otazky", label: "Otázky" },
-  { href: "/klient", label: "Pro klienty" },
 ];
 
 export function Header() {
@@ -47,6 +46,14 @@ export function Header() {
 
           <div className="flex items-center gap-2">
             <a
+              href="/klient"
+              aria-label="Přihlášení pro klienty"
+              className="inline-flex h-11 items-center gap-2 rounded-full border-2 border-hlubina/10 bg-white px-3 text-[15px] font-semibold text-hlubina transition-colors hover:border-hlubina/30 lg:px-4"
+            >
+              <UserRound size={18} aria-hidden="true" />
+              <span className="hidden lg:inline">Přihlásit</span>
+            </a>
+            <a
               href="#poptavka"
               className="hidden rounded-full bg-hlubina px-5 py-3 text-[15px] font-semibold text-white transition-colors hover:bg-vlna sm:inline-flex"
             >
@@ -82,6 +89,16 @@ export function Header() {
                   </a>
                 </li>
               ))}
+              <li className="mt-2">
+                <a
+                  href="/klient"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center justify-center gap-2 rounded-full border-2 border-hlubina/10 px-5 py-3.5 font-semibold text-hlubina"
+                >
+                  <UserRound size={18} aria-hidden="true" />
+                  Přihlášení pro klienty
+                </a>
+              </li>
               <li className="mt-2">
                 <a
                   href="#poptavka"

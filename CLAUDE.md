@@ -1,6 +1,6 @@
 # Pauzeo – projekt a verze
 
-> **Aktuální verze: 1.6** (zobrazuje se v patičce webu, zdroj `lib/version.ts`)
+> **Aktuální verze: 1.7** (zobrazuje se v patičce webu, zdroj `lib/version.ts`)
 > Při každém vydání: zvýšit verzi v `lib/version.ts`, přidat záznam do Changelogu níže, `npm run build`, push na `main`.
 
 ## O projektu
@@ -28,7 +28,7 @@ Pauzeo jsou **wellbeing boxy pro firmy** v ČR a SK. Firma předplatí boxy pro 
 - Framer Motion (animace), lucide-react (ikony)
 - three.js + @react-three/fiber + drei (3D krabice, načítá se líně, s 2D zálohou bez WebGL)
 - Fonty `@fontsource-variable`: Fraunces (nadpisy, osa SOFT) a Figtree (text)
-- Úložiště: **Upstash Redis** přes REST (`lib/store.ts`), bez něj ukázkový režim v paměti
+- Úložiště: **Google Firebase – Cloud Firestore** přes `firebase-admin` (`lib/store.ts`), bez něj ukázkový režim v paměti
 
 ## Proměnné prostředí (Vercel → Settings → Environment Variables)
 
@@ -36,20 +36,21 @@ Pauzeo jsou **wellbeing boxy pro firmy** v ČR a SK. Firma předplatí boxy pro 
 |---|---|
 | `ADMIN_PASSWORD` | Heslo do `/admin` (bez něj je administrace vypnutá) |
 | `AUTH_SECRET` | Tajemství pro podpis přihlášení (doporučeno, jinak se odvodí z hesla) |
-| `KV_REST_API_URL` + `KV_REST_API_TOKEN` | Upstash Redis (vytvoří se samy po připojení Storage → Upstash for Redis). Alternativně `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` |
+| `FIREBASE_SERVICE_ACCOUNT` | JSON klíč servisního účtu Firebase (celý obsah souboru, případně base64). Alternativně trojice `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` |
 
-Bez Redis běží **ukázkový režim**: data jsou v paměti serveru, po restartu se ztratí. Existuje demo klient `demo@pauzeo.cz` / `demo2026`.
+Bez Firebase běží **ukázkový režim**: data jsou v paměti serveru, po restartu se ztratí. Existuje demo klient `demo@pauzeo.cz` / `demo2026`.
 
 ## Struktura
 
 - `lib/types.ts` – datové typy (katalog, edice, klient, objednávka, poptávka, klíče ikon a 3D modelů)
 - `lib/seed.ts` – výchozí katalog a demo data
-- `lib/store.ts` – čtení a zápis (Redis / paměť), klíče `pauzeo:catalog|clients|orders|leads`
+- `lib/store.ts` – čtení a zápis (Firestore / paměť): dokument `settings/catalog`, kolekce `clients`, `orders`, `leads`
 - `lib/validate.ts` – kontrola dat z administrace
 - `lib/auth.ts`, `lib/crypto.ts` – podepsané cookies, hash přístupových kódů (scrypt)
 - `lib/labels.ts` – české popisky (období, stavy objednávek, ikony, 3D modely), formátování
 - `lib/version.ts` – verze webu
 - `data/boxes.ts` – barevná témata variant a převod dat na zobrazení
+- `components/EditionBanner.tsx`, `components/EditionScene.tsx` – banner aktuální edice s 3D scénou ročního období a odpočtem
 - `components/Box3D.tsx` – 3D scéna (kulatá krabice, víko, představení věcí jedna po druhé)
 - `components/Models3D.tsx` – **knihovna 3D modelů produktů**
 - `components/admin/*`, `components/klient/*` – administrace a klientská sekce
@@ -76,6 +77,13 @@ Každá věc v boxu má v administraci zvolený 3D model (`model`). Knihovna: pl
 - Fakturace (napojení na účetní systém)
 
 ## Changelog
+
+### 1.7
+- Databáze přes Google Firebase (Cloud Firestore) místo Upstash Redis
+- Banner aktuální edice s three.js scénou podle ročního období (sníh, okvětní lístky, letní světla, padající listí), mini krabicí a živým odpočtem do uzávěrky
+- Štítky „Ručně balené v Česku“ a „Domů i do kanceláře“ viditelné i na mobilu
+- „Wellbeing boxy pro firmy“ na mobilu pod obrázkem, na PC beze změny
+- Tlačítko „Přihlásit“ pro klienty v menu (na mobilu ikona a položka v menu)
 
 ### 1.6
 - Štítek „Wellbeing boxy pro firmy“ v úvodu (na mobilu hned pod menu)

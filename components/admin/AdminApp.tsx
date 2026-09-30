@@ -66,8 +66,8 @@ export function AdminApp({ initial }: { initial: AdminState }) {
 
         {state.storage === "memory" && (
           <Notice tone="warn">
-            <b>Ukázkový režim:</b> databáze zatím není připojená, takže se změny po chvíli ztratí. Ve Vercelu otevřete
-            Storage → Create Database → Upstash for Redis a připojte ji k projektu. Pak web znovu nasaďte.
+            <b>Ukázkový režim:</b> databáze Firebase zatím není připojená, takže se změny po chvíli ztratí. Ve Vercelu
+            přidejte proměnnou FIREBASE_SERVICE_ACCOUNT (JSON klíč servisního účtu) a web znovu nasaďte.
           </Notice>
         )}
 

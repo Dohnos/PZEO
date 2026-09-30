@@ -3,11 +3,11 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion, useInView, useReducedMotion, type PanInfo } from "framer-motion";
-import { CalendarClock, ChevronLeft, ChevronRight, Leaf, Package, PackageOpen, Snowflake, Sprout, Sun } from "lucide-react";
+import { ChevronLeft, ChevronRight, Package, PackageOpen } from "lucide-react";
+import { EditionBanner } from "@/components/EditionBanner";
 import { BoxScene, Motif } from "@/components/BoxScene";
 import { formatPrice, toVariants, type Gender, type VariantId } from "@/data/boxes";
-import { editionLabel, formatDate } from "@/lib/labels";
-import type { BoxData, Edition, SeasonId } from "@/lib/types";
+import type { BoxData, Edition } from "@/lib/types";
 
 // 3D scéna se načítá až v prohlížeči (three.js)
 const Box3D = dynamic(() => import("@/components/Box3D"), {
@@ -26,11 +26,8 @@ const genders: { id: Gender; label: string }[] = [
   { id: "muzi", label: "Pánská náplň" },
 ];
 
-const seasonIcons: Record<SeasonId, typeof Sun> = { jaro: Sprout, leto: Sun, podzim: Leaf, zima: Snowflake };
-
 export function Variants({ data, edition }: { data: BoxData[]; edition: Edition }) {
   const boxes = useMemo(() => toVariants(data), [data]);
-  const SeasonIcon = seasonIcons[edition.season];
   const [active, setActive] = useState(0);
   const [dir, setDir] = useState(1);
   const [gender, setGender] = useState<Gender>("zeny");
@@ -95,37 +92,7 @@ export function Variants({ data, edition }: { data: BoxData[]; edition: Edition 
         </p>
 
         {/* aktuální edice (nastavuje admin) */}
-        <div className="mt-6 inline-flex max-w-full items-center gap-4 rounded-[28px] bg-white py-3 pl-3 pr-6 shadow-[0_6px_24px_rgba(15,42,54,0.06)]">
-          <span
-            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${
-              edition.open ? "bg-vlna text-white" : "bg-mlha text-hlubina-2"
-            }`}
-          >
-            <SeasonIcon size={22} strokeWidth={1.8} aria-hidden="true" />
-          </span>
-          <span className="min-w-0">
-            {edition.open ? (
-              <>
-                <span className="block font-semibold leading-snug">
-                  Právě objednáváte: {editionLabel(edition)}
-                </span>
-                <span className="mt-0.5 flex items-center gap-1.5 text-sm text-hlubina-2">
-                  <CalendarClock size={15} aria-hidden="true" className="shrink-0" />
-                  Uzávěrka {formatDate(edition.deadline)}, doručení: {edition.delivery}
-                </span>
-              </>
-            ) : (
-              <>
-                <span className="block font-semibold leading-snug">
-                  {editionLabel(edition)}: objednávky jsou uzavřené
-                </span>
-                <span className="mt-0.5 block text-sm text-hlubina-2">
-                  Napište nám a dáme vědět, až otevřeme další edici.
-                </span>
-              </>
-            )}
-          </span>
-        </div>
+        <EditionBanner edition={edition} />
 
         {/* velký přepínač variant */}
         <div className="mt-8">

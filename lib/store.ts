@@ -1,96 +1,134 @@
 /**
- * Úložiště dat.
- * - Když jsou ve Vercelu nastavené proměnné Upstash Redis (KV_REST_API_URL + KV_REST_API_TOKEN,
- *   nebo UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN), data se ukládají natrvalo.
- * - Jinak běží ukázkový režim v paměti serveru (změny se po restartu ztratí).
+ * Úložiště dat: Google Firebase (Cloud Firestore).
+ *
+ * Přihlašovací údaje servisního účtu (Vercel → Environment Variables), jedna z variant:
+ *  - FIREBASE_SERVICE_ACCOUNT = celý JSON klíč (nebo jeho base64)
+ *  - FIREBASE_PROJECT_ID + FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY
+ *
+ * Struktura ve Firestore:
+ *  settings/catalog      – boxy, produkty a aktuální edice
+ *  clients/{id}          – klienti
+ *  orders/{id}           – objednávky
+ *  leads/{id}            – poptávky z webu
+ *
+ * Bez údajů běží ukázkový režim v paměti serveru (změny se po restartu ztratí).
  */
+import type { Firestore } from "firebase-admin/firestore";
 import { hashCode } from "@/lib/crypto";
 import { demoClient, demoOrders, seedCatalog } from "@/lib/seed";
 import type { Catalog, Client, Lead, Order } from "@/lib/types";
 
-const KEYS = {
-  catalog: "pauzeo:catalog",
-  clients: "pauzeo:clients",
-  orders: "pauzeo:orders",
-  leads: "pauzeo:leads",
-} as const;
+type Collection = "clients" | "orders" | "leads";
 
-type Key = (typeof KEYS)[keyof typeof KEYS];
-
-function redisConfig() {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-  return url && token ? { url, token } : null;
+function firebaseConfig() {
+  const raw = process.env.FIREBASE_SERVICE_ACCOUNT?.trim();
+  if (raw) {
+    try {
+      const json = raw.startsWith("{") ? raw : Buffer.from(raw, "base64").toString("utf8");
+      const sa = JSON.parse(json) as { project_id: string; client_email: string; private_key: string };
+      return { projectId: sa.project_id, clientEmail: sa.client_email, privateKey: sa.private_key };
+    } catch (err) {
+      console.error("FIREBASE_SERVICE_ACCOUNT nelze přečíst:", err);
+    }
+  }
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+  return projectId && clientEmail && privateKey ? { projectId, clientEmail, privateKey } : null;
 }
 
-export const storageMode = (): "redis" | "memory" => (redisConfig() ? "redis" : "memory");
+export const storageMode = (): "firebase" | "memory" => (firebaseConfig() ? "firebase" : "memory");
 
-async function redis(command: string[]) {
-  const cfg = redisConfig();
-  if (!cfg) throw new Error("Redis není nastavený");
-  const res = await fetch(cfg.url, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${cfg.token}`, "Content-Type": "application/json" },
-    body: JSON.stringify(command),
-    cache: "no-store",
-  });
-  const json = (await res.json()) as { result?: unknown; error?: string };
-  if (!res.ok || json.error) throw new Error(json.error ?? `Redis ${res.status}`);
-  return json.result;
+let db: Firestore | null = null;
+
+async function firestore(): Promise<Firestore | null> {
+  if (db) return db;
+  const cfg = firebaseConfig();
+  if (!cfg) return null;
+  const { cert, getApps, initializeApp } = await import("firebase-admin/app");
+  const { getFirestore } = await import("firebase-admin/firestore");
+  const app = getApps().find((a) => a.name === "pauzeo") ?? initializeApp({ credential: cert(cfg) }, "pauzeo");
+  db = getFirestore(app);
+  try {
+    db.settings({ ignoreUndefinedProperties: true });
+  } catch {
+    // nastavení lze zavolat jen jednou
+  }
+  return db;
 }
 
-/* --- paměťový režim --- */
-const g = globalThis as unknown as { __pauzeo?: Partial<Record<Key, unknown>> };
-function memory() {
+/* --- ukázkový režim v paměti --- */
+type Memory = { catalog: Catalog; clients: Client[]; orders: Order[]; leads: Lead[] };
+const g = globalThis as unknown as { __pauzeo?: Memory };
+function memory(): Memory {
   if (!g.__pauzeo) {
     const { hash, salt } = hashCode("demo2026");
     g.__pauzeo = {
-      [KEYS.catalog]: structuredClone(seedCatalog),
-      [KEYS.clients]: [demoClient(hash, salt)],
-      [KEYS.orders]: structuredClone(demoOrders),
-      [KEYS.leads]: [],
+      catalog: structuredClone(seedCatalog),
+      clients: [demoClient(hash, salt)],
+      orders: structuredClone(demoOrders),
+      leads: [],
     };
   }
   return g.__pauzeo;
 }
 
-async function read<T>(key: Key, fallback: () => T): Promise<T> {
-  if (redisConfig()) {
-    const raw = await redis(["GET", key]);
-    return typeof raw === "string" ? (JSON.parse(raw) as T) : fallback();
-  }
-  return (memory()[key] as T | undefined) ?? fallback();
+/* --- obecné čtení a zápis kolekcí --- */
+async function readList<T extends { createdAt: string }>(name: Collection, desc = true): Promise<T[]> {
+  const fs = await firestore();
+  const list = fs
+    ? (await fs.collection(name).get()).docs.map((d) => d.data() as T)
+    : (structuredClone(memory()[name]) as unknown as T[]);
+  return list.sort((a, b) => (desc ? b.createdAt.localeCompare(a.createdAt) : a.createdAt.localeCompare(b.createdAt)));
 }
 
-async function write<T>(key: Key, value: T) {
-  if (redisConfig()) {
-    await redis(["SET", key, JSON.stringify(value)]);
+async function writeList<T extends { id: string }>(name: Collection, list: T[]) {
+  const fs = await firestore();
+  if (!fs) {
+    (memory() as unknown as Record<Collection, T[]>)[name] = structuredClone(list);
     return;
   }
-  memory()[key] = structuredClone(value);
+  const col = fs.collection(name);
+  const existing = await col.listDocuments();
+  const keep = new Set(list.map((x) => x.id));
+  const ops: Array<(b: FirebaseFirestore.WriteBatch) => void> = [
+    ...list.map((item) => (b: FirebaseFirestore.WriteBatch) => b.set(col.doc(item.id), item)),
+    ...existing.filter((ref) => !keep.has(ref.id)).map((ref) => (b: FirebaseFirestore.WriteBatch) => b.delete(ref)),
+  ];
+  for (let i = 0; i < ops.length; i += 400) {
+    const batch = fs.batch();
+    ops.slice(i, i + 400).forEach((op) => op(batch));
+    await batch.commit();
+  }
 }
 
 /* --- veřejné funkce --- */
 
 export async function getCatalog(): Promise<Catalog> {
   try {
-    const c = await read<Catalog>(KEYS.catalog, () => structuredClone(seedCatalog));
+    const fs = await firestore();
+    const c = fs ? ((await fs.doc("settings/catalog").get()).data() as Catalog | undefined) : structuredClone(memory().catalog);
     return c?.boxes?.length === 3 && c.edition ? c : structuredClone(seedCatalog);
   } catch (err) {
     console.error("Načtení katalogu selhalo, používám výchozí:", err);
     return structuredClone(seedCatalog);
   }
 }
-export const saveCatalog = (c: Catalog) => write(KEYS.catalog, c);
 
-export const getClients = () => read<Client[]>(KEYS.clients, () => []);
-export const saveClients = (list: Client[]) => write(KEYS.clients, list);
+export async function saveCatalog(c: Catalog) {
+  const fs = await firestore();
+  if (fs) await fs.doc("settings/catalog").set(c);
+  else memory().catalog = structuredClone(c);
+}
 
-export const getOrders = () => read<Order[]>(KEYS.orders, () => []);
-export const saveOrders = (list: Order[]) => write(KEYS.orders, list);
+export const getClients = () => readList<Client>("clients", false);
+export const saveClients = (list: Client[]) => writeList("clients", list);
 
-export const getLeads = () => read<Lead[]>(KEYS.leads, () => []);
-export const saveLeads = (list: Lead[]) => write(KEYS.leads, list);
+export const getOrders = () => readList<Order>("orders");
+export const saveOrders = (list: Order[]) => writeList("orders", list);
+
+export const getLeads = () => readList<Lead>("leads");
+export const saveLeads = (list: Lead[]) => writeList("leads", list);
 
 /** Další číslo objednávky ve tvaru PZ-2026-023. */
 export function nextOrderNumber(orders: Order[]) {
