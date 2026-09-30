@@ -18,6 +18,23 @@ const floating = [
   { icon: Truck, text: "Domů i do kanceláře", pos: "right-[-2%] bottom-[3%] sm:right-[-4%]", delay: 1.2 },
 ];
 
+/** Slovo, přes které se po načtení „přeškrtne“ čára. */
+function Strike({ children, delay }: { children: React.ReactNode; delay: number }) {
+  const reduce = useReducedMotion();
+  return (
+    <span className="relative inline-block">
+      {children}
+      <motion.span
+        aria-hidden="true"
+        className="absolute left-[-4%] right-[-4%] top-[54%] h-[0.11em] origin-left rounded-full bg-zlato"
+        initial={{ scaleX: reduce ? 1 : 0, rotate: -4 }}
+        animate={{ scaleX: 1, rotate: -4 }}
+        transition={{ duration: reduce ? 0 : 0.45, delay: reduce ? 0 : delay, ease: [0.65, 0, 0.35, 1] }}
+      />
+    </span>
+  );
+}
+
 export function HeroClient({ hasImage }: { hasImage: boolean }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLElement>(null);
@@ -52,7 +69,13 @@ export function HeroClient({ hasImage }: { hasImage: boolean }) {
           <h1 className="font-display text-[clamp(3.4rem,9vw,6.6rem)] font-medium leading-[0.95] tracking-[-0.02em] text-hlubina">
             Dejte týmu pauzu.
           </h1>
-          <p className="mt-6 max-w-[32ch] text-lg leading-relaxed text-hlubina-2 sm:text-xl">
+          <p className="mt-5 font-display text-[clamp(1.45rem,3.2vw,2rem)] font-normal leading-snug text-vlna">
+            Váš tým nechce další <Strike delay={1.1}>víno</Strike>{" "}
+            <span className="whitespace-nowrap">
+              ani <Strike delay={1.5}>klobásy</Strike>.
+            </span>
+          </p>
+          <p className="mt-4 max-w-[32ch] text-lg leading-relaxed text-hlubina-2 sm:text-xl">
             Každé čtvrtletí box se šesti věcmi od českých manufaktur. Doručíme ho každému domů
             i&nbsp;do kanceláře.
           </p>

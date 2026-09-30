@@ -1,10 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import dynamic from "next/dynamic";
 import { AnimatePresence, motion, useInView, useReducedMotion, type PanInfo } from "framer-motion";
 import { ChevronLeft, ChevronRight, Package, PackageOpen } from "lucide-react";
 import { BoxScene, Motif } from "@/components/BoxScene";
 import { boxes, formatPrice, type Gender, type VariantId } from "@/data/boxes";
+
+// 3D scéna se načítá až v prohlížeči (three.js)
+const Box3D = dynamic(() => import("@/components/Box3D"), {
+  ssr: false,
+  loading: () => <div className="aspect-square w-full" />,
+});
 
 const accusative: Record<VariantId, string> = {
   kapka: "Kapku",
@@ -23,11 +30,13 @@ export function Variants() {
   const [gender, setGender] = useState<Gender>("zeny");
   const [open, setOpen] = useState(false);
   const [hi, setHi] = useState<number | null>(null);
+  const [presenting, setPresenting] = useState<number | null>(null);
   const tabsRef = useRef<Array<HTMLButtonElement | null>>([]);
   const panelRef = useRef<HTMLDivElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const dragged = useRef(false);
   const inView = useInView(boxRef, { once: true, amount: 0.6 });
+  const visible = useInView(boxRef, { amount: 0.05 });
   const reduce = useReducedMotion();
 
   const variant = boxes[active];
@@ -178,8 +187,56 @@ export function Variants() {
                   className="cursor-grab touch-pan-y active:cursor-grabbing"
                   aria-hidden="true"
                 >
-                  <BoxScene variant={variant} items={items} open={open} contentKey={contentKey} highlighted={hi} />
+                  <Box3D
+                    variant={variant}
+                    open={open}
+                    restartKey={variant.id}
+                    highlighted={hi}
+                    reduce={!!reduce}
+                    onPresent={setPresenting}
+                    active={visible}
+                    fallback={
+                      <BoxScene variant={variant} items={items} open={open} contentKey={contentKey} highlighted={hi} />
+                    }
+                  />
                 </motion.div>
+
+                {/* popisek právě představované věci */}
+                <div className="pointer-events-none absolute inset-x-0 bottom-[2%] flex justify-center px-14" aria-live="polite">
+                  <AnimatePresence mode="wait">
+                    {presenting !== null && items[presenting] && (
+                      <motion.div
+                        key={`${contentKey}-cap-${presenting}`}
+                        initial={{ opacity: 0, y: 12, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                        className="flex max-w-full items-center gap-3 rounded-full py-2 pl-2 pr-5 shadow-[0_12px_30px_rgba(0,0,0,0.18)]"
+                        style={{ background: t.badgeBg, color: t.badgeInk }}
+                      >
+                        {(() => {
+                          const Icon = items[presenting].icon;
+                          return (
+                            <span
+                              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                              style={{ background: t.accent, color: t.onAccent }}
+                            >
+                              <Icon size={18} strokeWidth={1.9} aria-hidden="true" />
+                            </span>
+                          );
+                        })()}
+                        <span className="min-w-0">
+                          <span className="block text-xs font-semibold opacity-75">
+                            {presenting + 1} ze 6
+                          </span>
+                          <span className="block truncate text-[15px] font-semibold leading-tight">
+                            {items[presenting].name}
+                          </span>
+                        </span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
 
                 <button
                   type="button"

@@ -3,6 +3,7 @@ import { Hero } from "@/components/Hero";
 import { Variants } from "@/components/Variants";
 import { Marquee } from "@/components/Marquee";
 import { Numbers } from "@/components/Numbers";
+import { Seasons } from "@/components/Seasons";
 import { HowItWorks } from "@/components/HowItWorks";
 import { ForCompanies } from "@/components/ForCompanies";
 import { Faq } from "@/components/Faq";
@@ -18,6 +19,7 @@ export default function Home() {
         <Marquee />
         <Variants />
         <Numbers />
+        <Seasons />
         <HowItWorks />
         <ForCompanies />
         <Faq />
