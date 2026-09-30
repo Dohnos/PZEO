@@ -2,8 +2,10 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { Leaf, Snowflake, Sprout, Sun, type LucideIcon } from "lucide-react";
+import type { Edition, SeasonId } from "@/lib/types";
 
 type Season = {
+  id: SeasonId;
   name: string;
   theme: string;
   month: string;
@@ -18,6 +20,7 @@ type Season = {
 
 const seasons: Season[] = [
   {
+    id: "jaro",
     name: "Jaro",
     theme: "Nabij se",
     month: "Doručení v dubnu",
@@ -29,6 +32,7 @@ const seasons: Season[] = [
     loop: { rotate: [-6, 6, -6] },
   },
   {
+    id: "leto",
     name: "Léto",
     theme: "Vypni",
     month: "Doručení v červenci",
@@ -40,6 +44,7 @@ const seasons: Season[] = [
     loop: { rotate: [0, 360] },
   },
   {
+    id: "podzim",
     name: "Podzim",
     theme: "Zpomal",
     month: "Doručení v říjnu",
@@ -51,6 +56,7 @@ const seasons: Season[] = [
     loop: { rotate: [-10, 8, -10], y: [0, 4, 0] },
   },
   {
+    id: "zima",
     name: "Zima",
     theme: "Zahřej se",
     month: "Doručení v lednu",
@@ -63,7 +69,7 @@ const seasons: Season[] = [
   },
 ];
 
-export function Seasons() {
+export function Seasons({ current }: { current: Edition }) {
   const reduce = useReducedMotion();
 
   return (
@@ -125,9 +131,15 @@ export function Seasons() {
                     <Icon size={36} strokeWidth={1.6} aria-hidden="true" />
                   </motion.span>
                 </span>
-                <span className="font-display text-5xl font-medium opacity-20" aria-hidden="true">
-                  {i + 1}
-                </span>
+                {current.open && current.season === s.id ? (
+                  <span className="rounded-full px-3 py-1.5 text-xs font-bold text-white" style={{ background: s.accent }}>
+                    Právě v prodeji
+                  </span>
+                ) : (
+                  <span className="font-display text-5xl font-medium opacity-20" aria-hidden="true">
+                    {i + 1}
+                  </span>
+                )}
               </div>
               <div>
                 <h3 className="font-display text-4xl font-medium leading-none">{s.name}</h3>

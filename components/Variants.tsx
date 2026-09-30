@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion, useInView, useReducedMotion, type PanInfo } from "framer-motion";
-import { ChevronLeft, ChevronRight, Package, PackageOpen } from "lucide-react";
+import { CalendarClock, ChevronLeft, ChevronRight, Leaf, Package, PackageOpen, Snowflake, Sprout, Sun } from "lucide-react";
 import { BoxScene, Motif } from "@/components/BoxScene";
-import { boxes, formatPrice, type Gender, type VariantId } from "@/data/boxes";
+import { formatPrice, toVariants, type Gender, type VariantId } from "@/data/boxes";
+import { editionLabel, formatDate } from "@/lib/labels";
+import type { BoxData, Edition, SeasonId } from "@/lib/types";
 
 // 3D scéna se načítá až v prohlížeči (three.js)
 const Box3D = dynamic(() => import("@/components/Box3D"), {
@@ -24,7 +26,11 @@ const genders: { id: Gender; label: string }[] = [
   { id: "muzi", label: "Pánská náplň" },
 ];
 
-export function Variants() {
+const seasonIcons: Record<SeasonId, typeof Sun> = { jaro: Sprout, leto: Sun, podzim: Leaf, zima: Snowflake };
+
+export function Variants({ data, edition }: { data: BoxData[]; edition: Edition }) {
+  const boxes = useMemo(() => toVariants(data), [data]);
+  const SeasonIcon = seasonIcons[edition.season];
   const [active, setActive] = useState(0);
   const [dir, setDir] = useState(1);
   const [gender, setGender] = useState<Gender>("zeny");
@@ -52,6 +58,7 @@ export function Variants() {
   const go = (next: number, direction?: number) => {
     const n = (next + boxes.length) % boxes.length;
     setDir(direction ?? (n > active ? 1 : -1));
+    setPresenting(null);
     setActive(n);
   };
 
@@ -86,6 +93,39 @@ export function Variants() {
         <p className="mt-3 max-w-xl text-lg leading-relaxed text-hlubina-2">
           Tři varianty, vždy šest věcí. Stejná cena pro muže i&nbsp;ženy.
         </p>
+
+        {/* aktuální edice (nastavuje admin) */}
+        <div className="mt-6 inline-flex max-w-full items-center gap-4 rounded-[28px] bg-white py-3 pl-3 pr-6 shadow-[0_6px_24px_rgba(15,42,54,0.06)]">
+          <span
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${
+              edition.open ? "bg-vlna text-white" : "bg-mlha text-hlubina-2"
+            }`}
+          >
+            <SeasonIcon size={22} strokeWidth={1.8} aria-hidden="true" />
+          </span>
+          <span className="min-w-0">
+            {edition.open ? (
+              <>
+                <span className="block font-semibold leading-snug">
+                  Právě objednáváte: {editionLabel(edition)}
+                </span>
+                <span className="mt-0.5 flex items-center gap-1.5 text-sm text-hlubina-2">
+                  <CalendarClock size={15} aria-hidden="true" className="shrink-0" />
+                  Uzávěrka {formatDate(edition.deadline)}, doručení: {edition.delivery}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="block font-semibold leading-snug">
+                  {editionLabel(edition)}: objednávky jsou uzavřené
+                </span>
+                <span className="mt-0.5 block text-sm text-hlubina-2">
+                  Napište nám a dáme vědět, až otevřeme další edici.
+                </span>
+              </>
+            )}
+          </span>
+        </div>
 
         {/* velký přepínač variant */}
         <div className="mt-8">
@@ -190,7 +230,8 @@ export function Variants() {
                   <Box3D
                     variant={variant}
                     open={open}
-                    restartKey={variant.id}
+                    models={items.map((i) => i.model)}
+                    restartKey={contentKey}
                     highlighted={hi}
                     reduce={!!reduce}
                     onPresent={setPresenting}
@@ -202,8 +243,8 @@ export function Variants() {
                 </motion.div>
 
                 {/* popisek právě představované věci */}
-                <div className="pointer-events-none absolute inset-x-0 bottom-[2%] flex justify-center px-14" aria-live="polite">
-                  <AnimatePresence mode="wait">
+                <div className="pointer-events-none absolute inset-x-14 bottom-[2%] h-14" aria-live="polite">
+                  <AnimatePresence initial={false}>
                     {presenting !== null && items[presenting] && (
                       <motion.div
                         key={`${contentKey}-cap-${presenting}`}
@@ -211,8 +252,8 @@ export function Variants() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -8, scale: 0.98 }}
                         transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                        className="flex max-w-full items-center gap-3 rounded-full py-2 pl-2 pr-5 shadow-[0_12px_30px_rgba(0,0,0,0.18)]"
-                        style={{ background: t.badgeBg, color: t.badgeInk }}
+                        className="absolute bottom-0 left-1/2 flex max-w-full items-center gap-3 whitespace-nowrap rounded-full py-2 pl-2 pr-5 shadow-[0_12px_30px_rgba(0,0,0,0.18)]"
+                        style={{ x: "-50%", background: t.badgeBg, color: t.badgeInk }}
                       >
                         {(() => {
                           const Icon = items[presenting].icon;
@@ -314,7 +355,10 @@ export function Variants() {
                       key={g.id}
                       type="button"
                       aria-pressed={sel}
-                      onClick={() => setGender(g.id)}
+                      onClick={() => {
+                        setPresenting(null);
+                        setGender(g.id);
+                      }}
                       className="rounded-full px-4 py-2.5 text-sm font-semibold transition-colors sm:px-5"
                       style={sel ? { background: t.accent, color: t.onAccent } : { background: "transparent", color: t.ink }}
                     >

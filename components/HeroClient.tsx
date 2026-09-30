@@ -4,19 +4,29 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { HandHeart, Package, Tag, Truck, Users } from "lucide-react";
+import { Leaf } from "@/components/Logo";
 import { BoxScene } from "@/components/BoxScene";
-import { boxes } from "@/data/boxes";
+import { formatPrice, toVariants } from "@/data/boxes";
+import type { BoxData } from "@/lib/types";
 
-const facts = [
-  { icon: Package, text: "3 varianty" },
-  { icon: Users, text: "Pánská i dámská náplň" },
-  { icon: Tag, text: "Od 890 Kč za box" },
-];
 
 const floating = [
   { icon: HandHeart, text: "Ručně balené v Česku", pos: "left-[-2%] top-[6%] sm:left-[-6%]", delay: 0 },
   { icon: Truck, text: "Domů i do kanceláře", pos: "right-[-2%] bottom-[3%] sm:right-[-4%]", delay: 1.2 },
 ];
+
+function WellbeingPill({ className = "" }: { className?: string }) {
+  return (
+    <p
+      className={`items-center gap-2.5 rounded-full bg-white py-2 pl-2 pr-5 text-[15px] font-semibold text-vlna shadow-[0_6px_20px_rgba(15,42,54,0.06)] ${className}`}
+    >
+      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-vlna text-white">
+        <Leaf size={17} />
+      </span>
+      Wellbeing boxy pro firmy
+    </p>
+  );
+}
 
 /** Slovo, přes které se po načtení „přeškrtne“ čára. */
 function Strike({ children, delay }: { children: React.ReactNode; delay: number }) {
@@ -35,11 +45,16 @@ function Strike({ children, delay }: { children: React.ReactNode; delay: number 
   );
 }
 
-export function HeroClient({ hasImage }: { hasImage: boolean }) {
+export function HeroClient({ hasImage, fallback, minPrice }: { hasImage: boolean; fallback: BoxData; minPrice: number }) {
+  const facts = [
+    { icon: Package, text: "3 varianty" },
+    { icon: Users, text: "Pánská i dámská náplň" },
+    { icon: Tag, text: `Od ${formatPrice(minPrice)} za box` },
+  ];
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
-  const vlna = boxes[1];
+  const vlna = toVariants([fallback])[0];
 
   const [desktop, setDesktop] = useState(false);
   useEffect(() => {
@@ -64,8 +79,13 @@ export function HeroClient({ hasImage }: { hasImage: boolean }) {
   return (
     <section ref={ref} className="relative overflow-hidden px-4 pb-14 pt-4 sm:px-6 md:pb-20 md:pt-10">
 
+      {/* na mobilu hned nahoře nad obrázkem */}
+      <div className="mb-4 flex justify-center md:hidden">
+        <WellbeingPill className="inline-flex" />
+      </div>
       <div className="relative mx-auto grid max-w-6xl items-center gap-8 md:grid-cols-[1fr_1.05fr] md:gap-8">
         <motion.div style={{ y: textY }} className="order-2 md:order-1">
+          <WellbeingPill className="mb-5 hidden md:inline-flex" />
           <h1 className="font-display text-[clamp(3.4rem,9vw,6.6rem)] font-medium leading-[0.95] tracking-[-0.02em] text-hlubina">
             Dejte týmu pauzu.
           </h1>

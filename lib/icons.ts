@@ -1,0 +1,41 @@
+import type { LucideIcon } from "lucide-react";
+import {
+  CircleDot,
+  Coffee,
+  Cookie,
+  Cylinder,
+  Droplet,
+  Droplets,
+  Flame,
+  Gem,
+  Gift,
+  GlassWater,
+  Hexagon,
+  Leaf,
+  MessageCircleHeart,
+  NotebookPen,
+  Sparkles,
+  Wind,
+  Zap,
+} from "lucide-react";
+import type { IconKey } from "@/lib/types";
+
+export const icons: Record<IconKey, LucideIcon> = {
+  coffee: Coffee,
+  flame: Flame,
+  droplet: Droplet,
+  droplets: Droplets,
+  circleDot: CircleDot,
+  cylinder: Cylinder,
+  sparkles: Sparkles,
+  notebookPen: NotebookPen,
+  hexagon: Hexagon,
+  glassWater: GlassWater,
+  gem: Gem,
+  messageCircleHeart: MessageCircleHeart,
+  zap: Zap,
+  cookie: Cookie,
+  wind: Wind,
+  leaf: Leaf,
+  gift: Gift,
+};

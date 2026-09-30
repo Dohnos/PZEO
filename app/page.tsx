@@ -10,16 +10,22 @@ import { Faq } from "@/components/Faq";
 import { ContactForm } from "@/components/ContactForm";
 import { Footer } from "@/components/Footer";
 
-export default function Home() {
+import { getCatalog } from "@/lib/store";
+
+// stránka se obnoví hned po uložení v administraci (revalidatePath)
+export const revalidate = 300;
+
+export default async function Home() {
+  const catalog = await getCatalog();
   return (
     <>
       <Header />
       <main>
-        <Hero />
+        <Hero catalog={catalog} />
         <Marquee />
-        <Variants />
+        <Variants data={catalog.boxes} edition={catalog.edition} />
         <Numbers />
-        <Seasons />
+        <Seasons current={catalog.edition} />
         <HowItWorks />
         <ForCompanies />
         <Faq />

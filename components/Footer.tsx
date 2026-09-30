@@ -1,4 +1,5 @@
 import { Logo } from "@/components/Logo";
+import { APP_VERSION } from "@/lib/version";
 
 export function Footer() {
   return (
@@ -14,7 +15,12 @@ export function Footer() {
           <a href="mailto:ahoj@pauzeo.cz" className="font-semibold text-hlubina hover:text-vlna">
             ahoj@pauzeo.cz
           </a>
-          <p>© {new Date().getFullYear()} Pauzeo</p>
+          <a href="/klient" className="hover:text-vlna">
+            Klientská sekce
+          </a>
+          <p>
+            © {new Date().getFullYear()} Pauzeo <span className="ml-1.5 text-xs opacity-60">v{APP_VERSION}</span>
+          </p>
         </div>
       </div>
     </footer>

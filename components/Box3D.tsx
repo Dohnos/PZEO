@@ -2,9 +2,11 @@
 
 import { Component, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { ContactShadows, Environment, Lightformer, RoundedBox } from "@react-three/drei";
+import { ContactShadows, Environment, Lightformer } from "@react-three/drei";
+import { Model } from "@/components/Models3D";
 import * as THREE from "three";
 import type { BoxVariant } from "@/data/boxes";
+import type { ModelKey } from "@/lib/types";
 
 /* ------------------------------------------------------------------ */
 /*  Časování a dráhy                                                   */
@@ -92,128 +94,12 @@ function presentingAt(e: number): number | null {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Modely věcí (z jednoduchých tvarů)                                 */
-/* ------------------------------------------------------------------ */
-
-const WOOD = "#b98a5c";
-
-function TeaTin() {
-  return (
-    <group>
-      <mesh castShadow>
-        <cylinderGeometry args={[0.26, 0.26, 0.46, 48]} />
-        <meshStandardMaterial color="#b3babc" metalness={0.65} roughness={0.3} />
-      </mesh>
-      <mesh position={[0, 0.26, 0]} castShadow>
-        <cylinderGeometry args={[0.275, 0.275, 0.09, 48]} />
-        <meshStandardMaterial color="#9aa2a5" metalness={0.7} roughness={0.28} />
-      </mesh>
-    </group>
-  );
-}
-
-function Candle() {
-  return (
-    <group>
-      <mesh castShadow>
-        <cylinderGeometry args={[0.27, 0.25, 0.46, 48]} />
-        <meshPhysicalMaterial color="#8a4516" roughness={0.12} metalness={0} clearcoat={1} clearcoatRoughness={0.1} />
-      </mesh>
-      <mesh position={[0, 0.2, 0]}>
-        <cylinderGeometry args={[0.245, 0.245, 0.03, 48]} />
-        <meshStandardMaterial color="#f1e6cf" roughness={0.8} />
-      </mesh>
-      <mesh position={[0, 0.3, 0]} scale={[0.045, 0.1, 0.045]}>
-        <sphereGeometry args={[1, 16, 16]} />
-        <meshBasicMaterial color="#ffc46b" toneMapped={false} />
-      </mesh>
-    </group>
-  );
-}
-
-function Bottle({ accent }: { accent: string }) {
-  return (
-    <group>
-      <mesh castShadow>
-        <cylinderGeometry args={[0.19, 0.21, 0.52, 40]} />
-        <meshPhysicalMaterial color="#efe6d6" roughness={0.35} clearcoat={0.6} />
-      </mesh>
-      <mesh position={[0, 0.34, 0]} castShadow>
-        <cylinderGeometry args={[0.1, 0.1, 0.18, 32]} />
-        <meshStandardMaterial color={accent} roughness={0.4} metalness={0.2} />
-      </mesh>
-    </group>
-  );
-}
-
-function Roller() {
-  return (
-    <group rotation={[0, 0, 0.15]}>
-      <mesh position={[0, -0.12, 0]} castShadow>
-        <cylinderGeometry args={[0.05, 0.065, 0.55, 24]} />
-        <meshStandardMaterial color={WOOD} roughness={0.6} />
-      </mesh>
-      <mesh position={[0, 0.2, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.025, 0.025, 0.5, 16]} />
-        <meshStandardMaterial color="#8c6a47" roughness={0.6} />
-      </mesh>
-      {[-0.17, 0.17].map((x) => (
-        <mesh key={x} position={[x, 0.2, 0]} castShadow>
-          <sphereGeometry args={[0.14, 32, 32]} />
-          <meshStandardMaterial color={WOOD} roughness={0.5} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function Notebook() {
-  return (
-    <group rotation={[0, 0, -0.08]}>
-      <RoundedBox args={[0.46, 0.62, 0.09]} radius={0.02} smoothness={3} castShadow>
-        <meshStandardMaterial color="#d7caae" roughness={0.95} />
-      </RoundedBox>
-      <mesh position={[0.015, 0, 0]}>
-        <boxGeometry args={[0.44, 0.58, 0.075]} />
-        <meshStandardMaterial color="#f6f0e3" roughness={0.9} />
-      </mesh>
-      <mesh position={[0.23, 0, 0]}>
-        <boxGeometry args={[0.07, 0.15, 0.1]} />
-        <meshStandardMaterial color="#c5b391" roughness={0.9} />
-      </mesh>
-    </group>
-  );
-}
-
-function Chocolate() {
-  return (
-    <group rotation={[0, 0, 0.12]}>
-      <mesh castShadow>
-        <boxGeometry args={[0.4, 0.62, 0.07]} />
-        <meshStandardMaterial color="#c8a574" roughness={0.95} />
-      </mesh>
-      <mesh position={[0, 0.22, 0.004]}>
-        <boxGeometry args={[0.4, 0.2, 0.075]} />
-        <meshStandardMaterial color="#4b2a1a" roughness={0.45} />
-      </mesh>
-      <mesh position={[0, -0.05, 0.005]}>
-        <boxGeometry args={[0.41, 0.018, 0.075]} />
-        <meshStandardMaterial color="#8a6b45" />
-      </mesh>
-      <mesh position={[0, 0, 0.005]}>
-        <boxGeometry args={[0.018, 0.63, 0.075]} />
-        <meshStandardMaterial color="#8a6b45" />
-      </mesh>
-    </group>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /*  Scéna                                                              */
 /* ------------------------------------------------------------------ */
 
 type SceneProps = {
   variant: BoxVariant;
+  models: ModelKey[];
   open: boolean;
   restartKey: string;
   highlighted: number | null;
@@ -221,7 +107,7 @@ type SceneProps = {
   onPresent?: (index: number | null) => void;
 };
 
-function Scene({ variant, open, restartKey, highlighted, reduce, onPresent }: SceneProps) {
+function Scene({ variant, models, open, restartKey, highlighted, reduce, onPresent }: SceneProps) {
   const t = variant.theme;
   const clock = useThree((s) => s.clock);
   const lidPivot = useRef<THREE.Group>(null);
@@ -304,14 +190,7 @@ function Scene({ variant, open, restartKey, highlighted, reduce, onPresent }: Sc
     }
   });
 
-  const items: ReactNode[] = [
-    <TeaTin key="0" />,
-    <Candle key="1" />,
-    <Bottle key="2" accent={t.motif} />,
-    <Roller key="3" />,
-    <Notebook key="4" />,
-    <Chocolate key="5" />,
-  ];
+  const items: ReactNode[] = models.map((m, i) => <Model key={`${i}-${m}`} kind={m} accent={t.motif} />);
 
   return (
     <>

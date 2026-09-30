@@ -9,6 +9,7 @@ const links = [
   { href: "#jak-to-funguje", label: "Jak to funguje" },
   { href: "#pro-firmy", label: "Pro firmy" },
   { href: "#otazky", label: "Otázky" },
+  { href: "/klient", label: "Pro klienty" },
 ];
 
 export function Header() {
